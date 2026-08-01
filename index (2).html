@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>GearPulse Executive</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563EB">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GP Exec">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#0F172A;overflow:hidden}
+  iframe{border:0;width:100%;height:100%;display:block}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:#0F172A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    flex-direction:column;gap:14px;transition:opacity .3s}
+  #loading.hide{opacity:0;pointer-events:none}
+  .spin{width:40px;height:40px;border:4px solid rgba(255,255,255,.18);border-top-color:#2563EB;
+    border-radius:50%;animation:sp .8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  #loading div.msg{font-size:13px;color:#94A3B8;font-weight:600}
+  #offline{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    background:#0F172A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    flex-direction:column;gap:10px;text-align:center;padding:24px}
+  #offline.show{display:flex}
+  #offline button{margin-top:8px;padding:11px 20px;border-radius:10px;border:none;
+    background:#2563EB;color:#fff;font-weight:700;font-size:13px}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spin"></div>
+  <div class="msg">Loading GearPulse Executive&hellip;</div>
+</div>
+
+<div id="offline">
+  <div style="font-size:15px;font-weight:700">No connection</div>
+  <div style="font-size:12.5px;color:#94A3B8;max-width:260px">
+    GearPulse Executive needs the internet to reach your live data \u2014 it isn't stored on this device.</div>
+  <button onclick="location.reload()">Try again</button>
+</div>
+
+<iframe id="app" src="PASTE-YOUR-STANDALONE-GP-EXEC-EXEC-URL-HERE" title="GearPulse Executive"></iframe>
+
+<script>
+var frame = document.getElementById('app');
+var loading = document.getElementById('loading');
+var offlinePane = document.getElementById('offline');
+var loaded = false;
+
+frame.addEventListener('load', function(){
+  loaded = true;
+  loading.classList.add('hide');
+  setTimeout(function(){ loading.style.display='none'; }, 320);
+});
+
+// If the iframe hasn't loaded within a reasonable window, it's almost
+// always no connection, not a slow server — Apps Script itself is fast.
+setTimeout(function(){
+  if(!loaded && !navigator.onLine){
+    loading.style.display='none';
+    offlinePane.classList.add('show');
+  }
+}, 12000);
+
+window.addEventListener('offline', function(){
+  if(!loaded){ loading.style.display='none'; offlinePane.classList.add('show'); }
+});
+window.addEventListener('online', function(){
+  if(offlinePane.classList.contains('show')) location.reload();
+});
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(function(e){ console.warn('SW failed', e); });
+}
+</script>
+</body>
+</html>
